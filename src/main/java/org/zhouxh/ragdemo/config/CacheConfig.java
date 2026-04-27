@@ -2,7 +2,6 @@ package org.zhouxh.ragdemo.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import dev.langchain4j.data.segment.TextSegment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

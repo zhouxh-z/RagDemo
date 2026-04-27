@@ -17,12 +17,12 @@ public class ParserFactory {
     public ParserFactory(List<DocumentParseService<ParseType>> parseList) {
         this.parseMap = parseList.stream()
                 .collect(Collectors.toMap(
-                        s -> s.getType(),  // key：type
+                        DocumentParseService::getType,  // key：type
                         s -> s     // value：实现类
                 ));
     }
 
-    public DocumentParseService getParseService(ParseType type) {
+    public DocumentParseService<ParseType> getParseService(ParseType type) {
         return this.parseMap.getOrDefault(type, this.parseMap.get(ParseType.TEXT)); // 默认返回 文本 解析器
     }
 }

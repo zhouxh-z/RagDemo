@@ -43,7 +43,7 @@ public class DocumentController {
         }
         try {
             // 异步上传
-            CompletableFuture<Void> future = documentService.upload(file, parseType);
+            documentService.upload(file, parseType);
             // 由于异步，这里不能立即知道是否跳过，但可以返回通用消息
             logger.info("File upload initiated asynchronously: {}", file.getOriginalFilename());
             return "Upload initiated successfully";
@@ -57,20 +57,13 @@ public class DocumentController {
         String filename = file.getOriginalFilename();
         if (filename == null) return null;
         String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        switch (extension) {
-            case "txt":
-                return ParseType.TEXT;
-            case "pdf":
-                return ParseType.PDF;
-            case "doc":
-            case "docx":
-                return ParseType.WORD;
-            case "html":
-            case "htm":
-                return ParseType.HTML;
-            default:
-                return null;
-        }
+        return switch (extension) {
+            case "txt" -> ParseType.TEXT;
+            case "pdf" -> ParseType.PDF;
+            case "doc", "docx" -> ParseType.WORD;
+            case "html", "htm" -> ParseType.HTML;
+            default -> null;
+        };
     }
 
     @GetMapping("/search")

@@ -1,5 +1,6 @@
 package org.zhouxh.ragdemo.data.service;
 
+
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
@@ -13,5 +14,6 @@ public interface EmbeddingService<T extends Enum<T>> {
     void embedded(List<TextSegment> segments);
     List<String> search(String query);
     List<EmbeddingMatch<TextSegment>> search(Query query);
+    List<EmbeddingMatch<TextSegment>> contentSearch(String query);
     T getType();
 }

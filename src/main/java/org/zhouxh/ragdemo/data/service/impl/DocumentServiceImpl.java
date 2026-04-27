@@ -5,7 +5,7 @@ import dev.langchain4j.data.segment.TextSegment;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +35,7 @@ public class DocumentServiceImpl implements DocumentService {
     ParserFactory parserFactory;
 
     @Resource
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate;
 
     private static final String FINGERPRINT_KEY_PREFIX = "file:fingerprint:";
 

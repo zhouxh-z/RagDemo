@@ -1,5 +1,9 @@
 package org.zhouxh.ragdemo.data.config;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.onnx.bgesmallzhv15q.BgeSmallZhV15QuantizedEmbeddingModel;
@@ -15,6 +19,7 @@ import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 
 import javax.net.ssl.SSLContext;
 
@@ -34,7 +39,7 @@ public class RagEmbeddingConfig {
     }
 
     // ES 客户端
-    @Bean("esClient")
+    @Bean("restClient")
     public RestClient restClient() throws Exception {
         // 1. 创建凭证（账号密码）
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -58,11 +63,28 @@ public class RagEmbeddingConfig {
     }
 
     // ES 向量存储
-    @Bean("embeddingStore")
+    @Bean("esEmbeddingStore")
     public EmbeddingStore<TextSegment> embeddingStore(RestClient restClient) {
         return ElasticsearchEmbeddingStore.builder()
                 .restClient(restClient)
                 .indexName("rag-index")
                 .build();
     }
+
+    // 2. 创建ElasticsearchTransport (使用Jackson映射器)
+    @Bean
+    public ElasticsearchTransport elasticsearchTransport(RestClient restClient) {
+        return new RestClientTransport(restClient, new JacksonJsonpMapper());
+    }
+    // 3. 创建同步客户端 ElasticsearchClient
+    @Bean
+    public ElasticsearchClient elasticsearchClient(ElasticsearchTransport transport) {
+        return new ElasticsearchClient(transport);
+    }
+    // ES 客户端
+    @Bean
+    public ElasticsearchTemplate elasticsearchTemplate(ElasticsearchClient elasticsearchClient) {
+        return new ElasticsearchTemplate(elasticsearchClient);
+    }
+
 }

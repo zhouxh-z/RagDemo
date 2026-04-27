@@ -150,6 +150,19 @@
             <artifactId>bucket4j-jcache</artifactId>
             <version>7.6.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-elasticsearch</artifactId>
+            <version>5.2.5</version> <!-- 适配ES 8.x -->
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

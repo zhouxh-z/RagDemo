@@ -1,6 +1,7 @@
 package org.zhouxh.ragdemo.data.service.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -13,10 +14,13 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import org.zhouxh.ragdemo.data.entity.RegDocument;
 import org.zhouxh.ragdemo.data.enums.EmbeddingType;
 import org.zhouxh.ragdemo.data.service.EmbeddingService;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +29,7 @@ public class ElasticsearchEmbeddingServiceImpl implements EmbeddingService<Embed
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticsearchEmbeddingServiceImpl.class);
 
-    @Resource(name = "embeddingStore")
+    @Resource(name = "esEmbeddingStore")
     private EmbeddingStore<TextSegment> embeddingStore;
 
     @Resource(name = "embeddingModel")
@@ -148,5 +152,31 @@ public class ElasticsearchEmbeddingServiceImpl implements EmbeddingService<Embed
     @Override
     public EmbeddingType getType() {
         return EmbeddingType.ELASTICSEARCH;
+    }
+
+
+    @Resource
+    private ElasticsearchTemplate elasticsearchTemplate;
+
+    @Override
+    public List<EmbeddingMatch<TextSegment>> contentSearch(String query){
+        NativeQuery nativeQuery = NativeQuery.builder()
+                .withQuery(q -> q.match(m -> m
+                        .field("text")
+                        .query(query)
+                )).build();
+
+        SearchHits<RegDocument> search = elasticsearchTemplate.search(nativeQuery, RegDocument.class);
+        return toMatches(search);
+    }
+
+    private List<EmbeddingMatch<TextSegment>> toMatches(SearchHits<RegDocument> search) {
+
+        return search.map(document -> new EmbeddingMatch<>(
+                (double) document.getScore(),
+                document.getId(),
+                new Embedding(document.getContent().getVector()),
+                TextSegment.from(document.getContent().getText(), new Metadata(document.getContent().getMetadata()))
+        )).toList();
     }
 }
